@@ -67,10 +67,12 @@ public class IntroActivity extends AppCompatActivity {
                     viewFlipper.showNext();
                     updateDotColors(viewFlipper.getDisplayedChild()); // Update dot color after changing slide
                 } else {
-                    // If on the last slide, move to the next activity
-                    Intent intent = new Intent(IntroActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();  // Close this activity
+                    // Hide the intro content
+                    introContainer.setVisibility(View.GONE);
+                    // Show the fragment container
+                    fragmentContainer.setVisibility(View.VISIBLE);
+                    // Load the NotificationsFragment
+                    loadFragment(new NotificationsFragment(), 0);
                 }
             }
         });
@@ -137,5 +139,29 @@ public class IntroActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         handler.postDelayed(slideRunnable, 1000);
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+
+        // If the current fragment is NotificationsFragment, go back to intro slides
+        if (currentFragment instanceof NotificationsFragment) {
+            // Hide the fragment container
+            fragmentContainer.setVisibility(View.GONE);
+            // Show the intro container
+            introContainer.setVisibility(View.VISIBLE);
+            // Reset the ViewFlipper to the first slide
+            viewFlipper.setDisplayedChild(0);
+            updateDotColors(0); // Update the dot colors
+        } else {
+            // For other fragments (e.g., LocationFragment), let the fragment back stack handle the back press
+            if (fragmentManager.getBackStackEntryCount() > 0) {
+                fragmentManager.popBackStack();
+            } else {
+                super.onBackPressed();
+            }
+        }
     }
 }
